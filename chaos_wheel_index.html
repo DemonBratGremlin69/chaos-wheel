@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Chaos Wheel</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Nosifer&display=swap" rel="stylesheet">
+
+<style>
+  body {
+    margin: 0;
+    background: radial-gradient(circle, #0a0000, #000);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+  }
+
+  h1 {
+    color: red;
+    margin-top: 20px;
+    text-shadow: 0 0 10px red;
+  }
+
+  #container {
+    position: relative;
+  }
+
+  canvas {
+    border-radius: 50%;
+    box-shadow: 0 0 40px red;
+  }
+
+  #centerImg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120px;
+    height: 120px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 3px solid red;
+    background: black;
+  }
+
+  #spinBtn {
+    margin-top: 20px;
+    padding: 12px 28px;
+    font-size: 18px;
+    background: red;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+  }
+</style>
+</head>
+
+<body>
+
+<h1>CHAOS WHEEL</h1>
+
+<div id="container">
+  <canvas id="wheel" width="650" height="650"></canvas>
+  <img id="centerImg" src="ChaosMode.png" />
+</div>
+
+<button id="spinBtn">SPIN</button>
+
+<script>
+const canvas = document.getElementById("wheel");
+const ctx = canvas.getContext("2d");
+
+const cx = canvas.width / 2;
+const cy = canvas.height / 2;
+const radius = 300;
+
+const sections = [
+  "Demon Chaos",
+  "Steal A Car",
+  "Do Civ Jobs",
+  "Mess With PD",
+  "Go Hunting",
+  "Go Fishing",
+  "Do Illegal Activities",
+  "Chat Picks Outfit",
+  "Chat Picks Vehicle",
+  "Total Chaos",
+  "Club Shit"
+];
+
+const colors = [
+  "#ff004c","#00fff7","#ffea00","#b400ff","#00ff2a",
+  "#ff7a00","#ff00d4","#00b7ff","#ff1e1e","#39ff14"
+];
+
+let angle = 0;
+
+function wrapText(text, maxChars = 14) {
+  const words = text.split(" ");
+  let lines = [];
+  let line = "";
+
+  for (let w of words) {
+    if ((line + w).length > maxChars) {
+      lines.push(line.trim());
+      line = w + " ";
+    } else {
+      line += w + " ";
+    }
+  }
+  lines.push(line.trim());
+  return lines;
+}
+
+function drawWheel() {
+  const arc = (2 * Math.PI) / sections.length;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  for (let i = 0; i < sections.length; i++) {
+    const start = angle + i * arc;
+
+    ctx.beginPath();
+    ctx.fillStyle = colors[i % colors.length];
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, radius, start, start + arc);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = "black";
+    ctx.stroke();
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(start + arc / 2);
+
+    const text = sections[i].toUpperCase();
+    const lines = wrapText(text, 14);
+
+    ctx.font = "20px Nosifer";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "black";
+
+    const lineHeight = 22;
+    const startY = -(lines.length - 1) * lineHeight / 2;
+
+    for (let j = 0; j < lines.length; j++) {
+      ctx.fillText(lines[j], radius * 0.62, startY + j * lineHeight);
+    }
+
+    ctx.restore();
+  }
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.lineWidth = 6;
+  ctx.strokeStyle = "black";
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.fillStyle = "black";
+  ctx.arc(cx, cy, 70, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function spinWheel() {
+  let spin = Math.random() * 10 + 18;
+  let duration = 4500;
+  let start = null;
+
+  function animate(t) {
+    if (!start) start = t;
+    let progress = t - start;
+
+    let ease = 1 - Math.pow(1 - progress / duration, 3);
+    angle = spin * ease;
+
+    drawWheel();
+
+    if (progress < duration) requestAnimationFrame(animate);
+  }
+
+  requestAnimationFrame(animate);
+}
+
+document.getElementById("spinBtn").addEventListener("click", spinWheel);
+
+drawWheel();
+</script>
+
+</body>
+</html>
